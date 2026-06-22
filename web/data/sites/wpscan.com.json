@@ -1,0 +1,70 @@
+{
+  "url": "https://wpscan.com",
+  "domain": "wpscan.com",
+  "d": "wpscan.com",
+  "scanned_at": "2026-06-22T05:00:00Z",
+  "cached": false,
+  "method": "wpscan",
+  "wp_version": "6.5.3",
+  "wp_version_status": "latest",
+  "interesting_findings": [
+    {
+      "type": "xmlrpc",
+      "url": "https://wpscan.com/xmlrpc.php",
+      "message": "XML-RPC seems to be enabled: https://wpscan.com/xmlrpc.php"
+    },
+    {
+      "type": "readme",
+      "url": "https://wpscan.com/readme.html",
+      "message": "WordPress readme found: https://wpscan.com/readme.html"
+    },
+    {
+      "type": "wp-cron",
+      "url": "https://wpscan.com/wp-cron.php",
+      "message": "The external WP-Cron seems to be enabled: https://wpscan.com/wp-cron.php"
+    }
+  ],
+  "plugins": [
+    {
+      "slug": "yoast-seo",
+      "version": "22.1",
+      "vuln_count": 0,
+      "location": "https://wpscan.com/wp-content/plugins/yoast-seo/"
+    },
+    {
+      "slug": "contact-form-7",
+      "version": "5.9.5",
+      "vuln_count": 0,
+      "location": "https://wpscan.com/wp-content/plugins/contact-form-7/"
+    },
+    {
+      "slug": "wordfence",
+      "version": "7.11.1",
+      "vuln_count": 0,
+      "location": "https://wpscan.com/wp-content/plugins/wordfence/"
+    }
+  ],
+  "themes": [
+    {
+      "slug": "wpscan",
+      "version": "1.0.0",
+      "vuln_count": 0
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "login": "wpscanceo",
+      "display_name": "WPScan Team"
+    }
+  ],
+  "vuln_count": 0,
+  "plugin_count": 3,
+  "user_count": 1,
+  "xmlrpc_active": true,
+  "readme_exposed": true,
+  "api_token_used": false,
+  "display_name": "fmfalgun",
+  "display_loc": "Chennai, India",
+  "last_refreshed": "2026-06-22T05:00:00Z"
+}

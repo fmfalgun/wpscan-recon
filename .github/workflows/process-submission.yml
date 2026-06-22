@@ -1,0 +1,149 @@
+name: Process Submission
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  process:
+    if: startsWith(github.event.issue.title, '[submission]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install wpscan
+        run: |
+          sudo apt-get install -y ruby ruby-dev build-essential libcurl4-openssl-dev libxml2 libxml2-dev libxslt1-dev zlib1g-dev
+          sudo gem install wpscan --no-document
+        continue-on-error: true
+
+      - name: Extract URL from issue title
+        id: extract
+        run: |
+          TITLE="${{ github.event.issue.title }}"
+          URL="${TITLE#\[submission\] }"
+          URL=$(echo "$URL" | xargs)
+          # Ensure https:// scheme
+          if [[ "$URL" != http* ]]; then URL="https://$URL"; fi
+          DOMAIN=$(echo "$URL" | sed 's|https\?://||' | cut -d'/' -f1)
+          echo "url=$URL"       >> $GITHUB_OUTPUT
+          echo "domain=$DOMAIN" >> $GITHUB_OUTPUT
+
+      - name: Parse display metadata from issue body
+        id: parse
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          echo "$ISSUE_BODY" > /tmp/submission.json
+          python3 -c "
+          import json
+          try:
+              d = json.load(open('/tmp/submission.json'))
+              print('display_name=' + d.get('display_name',''))
+              print('display_loc='  + d.get('display_loc',''))
+          except:
+              print('display_name=')
+              print('display_loc=')
+          " >> $GITHUB_OUTPUT
+
+      - name: Run wpscan-recon
+        env:
+          URL:    ${{ steps.extract.outputs.url }}
+          DOMAIN: ${{ steps.extract.outputs.domain }}
+        run: |
+          python3 wpscan-recon.py -u "$URL" -o "web/data/sites/${DOMAIN}.json" --no-cache
+
+      - name: Merge metadata and update index.json
+        env:
+          URL:          ${{ steps.extract.outputs.url }}
+          DOMAIN:       ${{ steps.extract.outputs.domain }}
+          DISPLAY_NAME: ${{ steps.parse.outputs.display_name }}
+          DISPLAY_LOC:  ${{ steps.parse.outputs.display_loc }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, datetime
+
+          url          = os.environ['URL']
+          domain       = os.environ['DOMAIN']
+          display_name = os.environ.get('DISPLAY_NAME','')
+          display_loc  = os.environ.get('DISPLAY_LOC','')
+          now          = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+          site_file    = f'web/data/sites/{domain}.json'
+          index_file   = 'web/data/index.json'
+
+          with open(site_file) as f:
+              data = json.load(f)
+          data['display_name']   = display_name or 'anonymous'
+          data['display_loc']    = display_loc
+          data['last_refreshed'] = now
+          with open(site_file, 'w') as f:
+              json.dump(data, f, indent=2)
+
+          entry = {
+              'd':                 domain,
+              'url':               url,
+              'display_name':      display_name or 'anonymous',
+              'display_loc':       display_loc,
+              'scanned_at':        data.get('scanned_at', now),
+              'last_refreshed':    now,
+              'wp_version':        data.get('wp_version',''),
+              'wp_version_status': data.get('wp_version_status','unknown'),
+              'vuln_count':        data.get('vuln_count', 0),
+              'plugin_count':      data.get('plugin_count', 0),
+              'user_count':        data.get('user_count', 0),
+              'xmlrpc_active':     bool(data.get('xmlrpc_active')),
+              'readme_exposed':    bool(data.get('readme_exposed')),
+              'method':            data.get('method','wpscan'),
+          }
+
+          try:
+              with open(index_file) as f:
+                  index = json.load(f)
+          except:
+              index = {'total_sites':0,'sites':[]}
+
+          existing = [s for s in index.get('sites',[]) if s['d'] != domain]
+          existing.append(entry)
+          existing.sort(key=lambda s: -(s.get('vuln_count',0)))
+          index['sites']       = existing
+          index['total_sites'] = len(existing)
+          with open(index_file,'w') as f:
+              json.dump(index, f, indent=2)
+          print(f'[OK] {domain} added/updated')
+          PYEOF
+
+      - name: Commit data
+        env:
+          DOMAIN: ${{ steps.extract.outputs.domain }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/data/
+          git diff --cached --quiet || git commit -m "data: add $DOMAIN [skip ci]"
+          git push
+
+      - name: Close issue
+        uses: actions/github-script@v7
+        env:
+          DOMAIN: ${{ steps.extract.outputs.domain }}
+        with:
+          script: |
+            const domain = process.env.DOMAIN;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ **${domain}** processed — [WordPress Board](https://fmfalgun.github.io/wpscan-recon/wp-board.html)`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number, state: 'closed'
+            });

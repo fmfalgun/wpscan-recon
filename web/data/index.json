@@ -1,0 +1,21 @@
+{
+  "total_sites": 1,
+  "sites": [
+    {
+      "d": "wpscan.com",
+      "url": "https://wpscan.com",
+      "display_name": "fmfalgun",
+      "display_loc": "Chennai, India",
+      "scanned_at": "2026-06-22T05:00:00Z",
+      "last_refreshed": "2026-06-22T05:00:00Z",
+      "wp_version": "6.5.3",
+      "wp_version_status": "latest",
+      "vuln_count": 0,
+      "plugin_count": 3,
+      "user_count": 1,
+      "xmlrpc_active": true,
+      "readme_exposed": true,
+      "method": "wpscan"
+    }
+  ]
+}

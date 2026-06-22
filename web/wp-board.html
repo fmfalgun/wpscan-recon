@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WordPress Board — WPSCAN-RECON</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">WPSCAN-RECON</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="wp-board.html" class="nav-active">WordPress Board</a>
+    <a href="https://github.com/fmfalgun/wpscan-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href="https://fmfalgun.github.io" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>WORDPRESS <span>BOARD</span></h1>
+  <p class="hero-tagline">Community-submitted WordPress scans — sorted by vulnerability count</p>
+</section>
+
+<div class="hof-subheader">
+  <span id="wp-stats">loading...</span>
+</div>
+
+<main>
+  <div id="wp-disclaimer">
+    WordPress data sourced from active scans against publicly accessible sites.
+    Plugin vulnerability data requires WPScan API token.
+    For authorized testing and educational use only.
+  </div>
+
+  <div id="wp-howto">
+    <code class="inline-code">python3 wpscan-recon.py -u https://yoursite.com --submit</code>
+    <span>→ results appear here after CI processes the submission</span>
+  </div>
+
+  <div id="search-row">
+    <input type="text" id="search-input" placeholder="filter sites..." autocomplete="off" spellcheck="false">
+  </div>
+
+  <div id="site-list">
+    <p class="empty">Loading...</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <a href="index.html">← Home</a>
+  &nbsp;·&nbsp; WordPress Board &nbsp;·&nbsp;
+  <a href="https://github.com/fmfalgun/wpscan-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+</footer>
+
+<script src="assets/js/wp-board.js"></script>
+</body>
+</html>

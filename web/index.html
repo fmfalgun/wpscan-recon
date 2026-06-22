@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WPSCAN-RECON — WordPress Enumeration Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">WPSCAN-RECON</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-active">Home</a>
+    <a href="wp-board.html">WordPress Board</a>
+    <a href="https://github.com/fmfalgun/wpscan-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href="https://fmfalgun.github.io" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>WPSCAN <span>RECON</span></h1>
+  <p class="hero-tagline">WordPress enumeration · plugin vulns · user enumeration · XMLRPC + README exposure · SPF/DMARC via wpscan</p>
+  <div class="install-block">
+    <code>python3 wpscan-recon.py -u https://target.com</code>
+  </div>
+  <div class="hero-cta-row">
+    <a class="cta-btn" href="wp-board.html">→ WordPress Board</a>
+    <a class="cta-ghost" href="https://github.com/fmfalgun/wpscan-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  </div>
+</section>
+
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="info-panel">
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; WHAT IS WPSCAN RECON</div>
+      <div class="panel-text">
+        WordPress powers ~43% of the web. wpscan-recon runs a full WordPress fingerprint:
+        WordPress version + outdated check, installed plugins with versions and CVEs
+        (if API token), theme detection, user enumeration via REST API or author scan,
+        and exposure checks (xmlrpc.php — system.multicall brute-force risk; readme.html
+        — version disclosure). Structured JSON output saved per-scan.
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; WHY THIS SCRIPT</div>
+      <div class="panel-text">
+        Raw wpscan output is interactive text — hard to parse, no cache, no history.
+        wpscan-recon adds 24h SQLite caching (no re-scanning same target within a day),
+        structured JSON output, HTTP fallback mode (works without wpscan installed via urllib),
+        and community submission.
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; HOW IT WORKS</div>
+      <div class="arch-diagram">
+        <div class="arch-box">INPUT: --url https://target.com</div>
+        <div class="arch-box">↓</div>
+        <div class="arch-box">cache.db (24h TTL)</div>
+        <div class="arch-box">↓ (stale or --no-cache)</div>
+        <div class="arch-box">wpscan binary?<br>YES → wpscan --format json<br>NO&nbsp; → HTTP fallback (urllib)</div>
+        <div class="arch-box">↓</div>
+        <div class="arch-box">WP version · plugins · themes · users<br>xmlrpc.php · readme.html exposure<br>CVE lookup (requires --api-token)</div>
+        <div class="arch-box">↓</div>
+        <div class="arch-box">JSON output + terminal summary</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- RIGHT MAIN -->
+  <main class="home-main">
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; USAGE</div>
+      <pre class="code-block"><span class="code-comment"># Basic scan</span>
+python3 wpscan-recon.py --url https://target.com
+
+<span class="code-comment"># Save JSON output to file</span>
+python3 wpscan-recon.py --url https://target.com --output results.json
+
+<span class="code-comment"># Enable CVE lookup (WPScan API token required)</span>
+python3 wpscan-recon.py --url https://target.com --api-token YOUR_TOKEN
+
+<span class="code-comment"># Enumerate: vp=vulnerable plugins, vt=vulnerable themes, u=users, ap=all plugins</span>
+python3 wpscan-recon.py --url https://target.com --enumerate vp,vt,u,ap
+
+<span class="code-comment"># Bypass cache and force fresh scan</span>
+python3 wpscan-recon.py --url https://target.com --no-cache
+
+<span class="code-comment"># Submit results to the WordPress Board</span>
+python3 wpscan-recon.py --url https://target.com --submit
+
+<span class="code-comment"># Reconfigure API token or submission settings</span>
+python3 wpscan-recon.py --reconfigure</pre>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; OUTPUT SCHEMA</div>
+      <pre class="code-block">{
+  <span class="code-comment">// Target URL</span>
+  "url": "https://target.com",
+
+  <span class="code-comment">// Detected WordPress version (null if unknown)</span>
+  "wp_version": "6.4.2",
+
+  <span class="code-comment">// Array of detected plugins</span>
+  "plugins": [
+    {
+      "slug": "contact-form-7",
+      "version": "5.8.3",
+      "vulns": []
+    }
+  ],
+
+  <span class="code-comment">// Enumerated usernames</span>
+  "users": ["admin", "editor"],
+
+  <span class="code-comment">// Total CVE / vulnerability count across all plugins</span>
+  "vuln_count": 3,
+
+  <span class="code-comment">// xmlrpc.php accessible (system.multicall brute-force risk)</span>
+  "xmlrpc_active": true,
+
+  <span class="code-comment">// /readme.html accessible (version disclosure)</span>
+  "readme_exposed": false,
+
+  <span class="code-comment">// "wpscan" binary or "http_fallback" (urllib)</span>
+  "method": "wpscan"
+}</pre>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; XMLRPC RISK</div>
+      <div class="panel-text">
+        <code class="inline-code">xmlrpc.php</code> exposes <code class="inline-code">system.multicall</code> — allows 500+ password
+        attempts in a single HTTP request, bypassing rate limiting. Standard target for
+        credential stuffing and brute-force attacks against WordPress admin accounts.
+      </div>
+      <ul class="panel-list">
+        <li>Single request = hundreds of login attempts</li>
+        <li>Bypasses fail2ban and rate-limit plugins</li>
+        <li>Also exploitable for pingback SSRF (CVE-2013-0235 pattern)</li>
+        <li>Fix: disable via mu-plugin or <code class="inline-code">.htaccess</code> deny rule</li>
+      </ul>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; README EXPOSURE</div>
+      <div class="panel-text">
+        <code class="inline-code">/readme.html</code> reveals the exact WordPress version in plaintext.
+        Attackers use this to target known CVEs without triggering any active scanning.
+        A passive, zero-noise fingerprint vector.
+      </div>
+      <ul class="panel-list">
+        <li>Reveals exact WP version — narrows CVE search space</li>
+        <li>No authentication, no scanning — public GET request</li>
+        <li>Fix: delete <code class="inline-code">readme.html</code> or block via <code class="inline-code">.htaccess</code></li>
+        <li>Also check: <code class="inline-code">/license.txt</code>, <code class="inline-code">/wp-admin/install.php</code></li>
+      </ul>
+    </div>
+
+    <div class="hof-cta-card">
+      <div class="hof-cta-label">[ // WORDPRESS BOARD ]</div>
+      <div class="hof-cta-desc">
+        Every site scanned with <code class="inline-code">--submit</code> is indexed here. Browse WordPress version,
+        plugin counts, user enumeration results, and xmlrpc exposure — no tool required.
+      </div>
+      <a class="cta-btn" href="wp-board.html">→ Open WordPress Board</a>
+    </div>
+
+  </main>
+
+</div>
+
+<footer class="site-footer">
+  Built by Falgun Marothia &nbsp;·&nbsp; tool: wpscan (Ruby gem) &nbsp;·&nbsp;
+  <a href="https://github.com/fmfalgun/wpscan-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  &nbsp;·&nbsp;
+  <a href="wp-board.html">WordPress Board</a>
+</footer>
+
+</body>
+</html>

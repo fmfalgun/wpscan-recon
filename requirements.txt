@@ -1,0 +1,3 @@
+# No pip dependencies.
+# System requirement: gem install wpscan
+# Python 3.8+ stdlib used: argparse, json, subprocess, urllib.request, sqlite3, pathlib, datetime, shutil
