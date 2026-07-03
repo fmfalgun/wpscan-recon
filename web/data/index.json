@@ -6,16 +6,16 @@
       "url": "https://wpscan.com",
       "display_name": "fmfalgun",
       "display_loc": "Chennai, India",
-      "scanned_at": "2026-06-22T05:00:00Z",
-      "last_refreshed": "2026-07-02T06:03:08Z",
-      "wp_version": "6.5.3",
-      "wp_version_status": "latest",
+      "scanned_at": "2026-07-03T05:56:55Z",
+      "last_refreshed": "2026-07-03T05:56:57Z",
+      "wp_version": "",
+      "wp_version_status": "unknown",
       "vuln_count": 0,
-      "plugin_count": 3,
-      "user_count": 1,
+      "plugin_count": 0,
+      "user_count": 0,
       "xmlrpc_active": true,
-      "readme_exposed": true,
-      "method": "wpscan"
+      "readme_exposed": false,
+      "method": "http_fallback"
     }
   ]
 }
